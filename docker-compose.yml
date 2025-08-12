@@ -28,11 +28,6 @@ services:
     build: .
     container_name: ml-sentiment-api
     environment:
-      - DB_HOST=mssql
-      - DB_PORT=1433
-      - DB_NAME=SentimentDB
-      - DB_USER=sa
-      - DB_PASSWORD=StrongPassword123!
       - FLASK_ENV=production
     ports:
       - "5000:5000"
@@ -52,3 +47,5 @@ volumes:
 networks:
   ml-network:
     driver: bridge
+
+

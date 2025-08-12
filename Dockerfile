@@ -1,11 +1,12 @@
 # Use Python 3.11 slim image
 FROM python:3.11-slim
 
-# Install system dependencies for MS SQL Server
+# Install system dependencies for MS SQL Server and Ansible
 RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     unixodbc-dev \
+    ansible \
     && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list \
     && apt-get update \
@@ -21,6 +22,16 @@ COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Install pyyaml for reading secrets.yml
+RUN pip install pyyaml
+
+# Copy Ansible Vault related files
+COPY vault_password.txt .
+COPY secrets.yml .
+
+# Decrypt secrets.yml using Ansible Vault during image build
+RUN ansible-vault decrypt secrets.yml --vault-password-file vault_password.txt
 
 # Copy application files
 COPY config/ ./config/
@@ -45,3 +56,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # Run the application
 CMD ["python", "app.py"]
+
+
